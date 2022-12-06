@@ -57,7 +57,6 @@ const useShortcuts: UseShortcuts = (_options: string, _optionsForMac: string | C
 
   const shortcuts = getShortcuts(keys);
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
-    if (disabled.current) return;
     if (shortcuts.key === "") return;
     if (callback === null) return;
     if (event.key.toLowerCase() !== shortcuts.key) return;
@@ -67,6 +66,7 @@ const useShortcuts: UseShortcuts = (_options: string, _optionsForMac: string | C
     if (event.metaKey !== shortcuts.metaKey) return;
 
     event.preventDefault();
+    if (disabled.current) return;
     callback();
   }, [
     shortcuts.key,

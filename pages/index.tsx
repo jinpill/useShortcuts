@@ -1,20 +1,37 @@
+import { useState } from "react";
 import useShortcuts from "../hooks/useShortcuts";
 
 const Home = () => {
+  const [logs, setLogs] = useState<string[]>([]);
+
   const ENTER = useShortcuts("Enter", () => {
-    console.log("Enter pressed");
+    setLogs((prev) => [...prev, "Apply"]);
   });
 
   const CTRL_A = useShortcuts("Ctrl A", "Command A", () => {
-    console.log("Select All");
+    setLogs((prev) => [...prev, "Select All"]);
   });
 
   useShortcuts("Escape", () => {
-    ENTER.setDisabled(!ENTER.getDisabled());
-    CTRL_A.setDisabled(!CTRL_A.getDisabled());
+    const disabled = ENTER.getDisabled() && CTRL_A.getDisabled();
+
+    ENTER.setDisabled(!disabled);
+    CTRL_A.setDisabled(!disabled);
+
+    setLogs((prev) => [
+      ...prev,
+      disabled ? "Enable Shortcuts" : "Disable Shortcuts",
+    ]);
   });
 
-  return <h1>Home</h1>;
+  return (
+    <>
+      <h1>Home</h1>
+      {logs.map((log, index) => (
+        <p key={index}>{log}</p>
+      ))}
+    </>
+  );
 };
 
 export default Home;
