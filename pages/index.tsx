@@ -1,5 +1,6 @@
 import { useState } from "react";
 import useShortcuts from "../hooks/useShortcuts";
+import Shortcut from "../components/Shortcut";
 
 const Home = () => {
   const [logs, setLogs] = useState<string[]>([]);
@@ -26,7 +27,12 @@ const Home = () => {
 
   return (
     <>
-      <h1>Home</h1>
+      <h1>Logs</h1>
+      <div>
+        <Shortcut shortcut="Command A" feature="Select All" />
+        <Shortcut shortcut="Enter" feature="Apply" />
+        <Shortcut shortcut="ESC" feature="Enable / Disable Shortcuts" />
+      </div>
       {logs.map((log, index) => (
         <p key={index}>{log}</p>
       ))}
