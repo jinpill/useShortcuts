@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useRef, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Shortcut from "../components/Shortcut";
 import Modal from "../components/Modal";
 import style from "./index.module.css";
@@ -12,16 +12,14 @@ const Home = () => {
     setVisible(_visible);
   };
 
-  const handleLog: Dispatch<SetStateAction<string[]>> = (arg) => {
-    setLogs(arg);
-
+  useEffect(() => {
     if (logsRef.current === null) return;
 
     const $logs = logsRef.current.children;
     const $lastLog = $logs[$logs.length - 1];
 
-    $lastLog.scrollIntoView();
-  };
+    $lastLog?.scrollIntoView();
+  }, [logs]);
 
   return (
     <>
@@ -31,13 +29,15 @@ const Home = () => {
           Open Modal
         </button>
       </header>
+
       <div ref={logsRef}>
         {logs.map((log, index) => (
           <p key={index}>{log}</p>
         ))}
       </div>
+
       {visible && (
-        <Modal title="Modal" onClose={toggleModal.bind(null, false)} onLog={handleLog}>
+        <Modal title="Modal" onClose={toggleModal.bind(null, false)} onLog={setLogs}>
           <Shortcut shortcut="Cmmand L" feature="Enable / Disable Shortcuts" />
           <Shortcut shortcut="Command A" feature="Select All" />
           <Shortcut shortcut="Enter" feature="Apply" />
