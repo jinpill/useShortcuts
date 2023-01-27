@@ -1,41 +1,49 @@
-import { useState } from "react";
-import useShortcuts from "../hooks/useShortcuts";
+import { Dispatch, SetStateAction, useRef, useState } from "react";
 import Shortcut from "../components/Shortcut";
+import Modal from "../components/Modal";
+import style from "./index.module.css";
 
 const Home = () => {
+  const [visible, setVisible] = useState(false);
   const [logs, setLogs] = useState<string[]>([]);
+  const logsRef = useRef<HTMLDivElement>(null);
 
-  const ENTER = useShortcuts("Enter", () => {
-    setLogs((prev) => [...prev, "Apply"]);
-  });
+  const toggleModal = (_visible: boolean) => {
+    setVisible(_visible);
+  };
 
-  const CTRL_A = useShortcuts("Ctrl A", "Command A", () => {
-    setLogs((prev) => [...prev, "Select All"]);
-  });
+  const handleLog: Dispatch<SetStateAction<string[]>> = (arg) => {
+    setLogs(arg);
 
-  useShortcuts("Escape", () => {
-    const disabled = ENTER.getDisabled() && CTRL_A.getDisabled();
+    if (logsRef.current === null) return;
 
-    ENTER.setDisabled(!disabled);
-    CTRL_A.setDisabled(!disabled);
+    const $logs = logsRef.current.children;
+    const $lastLog = $logs[$logs.length - 1];
 
-    setLogs((prev) => [
-      ...prev,
-      disabled ? "Enable Shortcuts" : "Disable Shortcuts",
-    ]);
-  });
+    $lastLog.scrollIntoView();
+  };
 
   return (
     <>
-      <h1>Logs</h1>
-      <div>
-        <Shortcut shortcut="Command A" feature="Select All" />
-        <Shortcut shortcut="Enter" feature="Apply" />
-        <Shortcut shortcut="ESC" feature="Enable / Disable Shortcuts" />
+      <header className={style.header}>
+        <h1 className={style.title}>Logs</h1>
+        <button className={style.button} onClick={toggleModal.bind(null, true)}>
+          Open Modal
+        </button>
+      </header>
+      <div ref={logsRef}>
+        {logs.map((log, index) => (
+          <p key={index}>{log}</p>
+        ))}
       </div>
-      {logs.map((log, index) => (
-        <p key={index}>{log}</p>
-      ))}
+      {visible && (
+        <Modal title="Modal" onClose={toggleModal.bind(null, false)} onLog={handleLog}>
+          <Shortcut shortcut="Cmmand L" feature="Enable / Disable Shortcuts" />
+          <Shortcut shortcut="Command A" feature="Select All" />
+          <Shortcut shortcut="Enter" feature="Apply" />
+          <Shortcut shortcut="ESC" feature="Close the Modal" />
+        </Modal>
+      )}
     </>
   );
 };
