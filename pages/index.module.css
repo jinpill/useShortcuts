@@ -40,3 +40,7 @@
 .button:active {
   filter: brightness(0.9);
 }
+
+.logs {
+  padding: 0 12px 24px;
+}

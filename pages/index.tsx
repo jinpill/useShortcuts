@@ -8,10 +8,6 @@ const Home = () => {
   const [logs, setLogs] = useState<string[]>([]);
   const logsRef = useRef<HTMLDivElement>(null);
 
-  const toggleModal = (_visible: boolean) => {
-    setVisible(_visible);
-  };
-
   useEffect(() => {
     if (logsRef.current === null) return;
 
@@ -25,19 +21,24 @@ const Home = () => {
     <>
       <header className={style.header}>
         <h1 className={style.title}>Logs</h1>
-        <button className={style.button} onClick={toggleModal.bind(null, true)}>
+        <button className={style.button} onClick={setVisible.bind(null, true)}>
           Open Modal
+        </button>
+        <button className={style.button} onClick={setLogs.bind(null, [])}>
+          Clear
         </button>
       </header>
 
-      <div ref={logsRef}>
+      <div className={style.logs} ref={logsRef}>
         {logs.map((log, index) => (
-          <p key={index}>{log}</p>
+          <p key={index}>
+            {index + 1} - {log}
+          </p>
         ))}
       </div>
 
       {visible && (
-        <Modal title="Modal" onClose={toggleModal.bind(null, false)} onLog={setLogs}>
+        <Modal title="Modal" onClose={setVisible.bind(null, false)} onLog={setLogs}>
           <Shortcut shortcut="Cmmand L" feature="Enable / Disable Shortcuts" />
           <Shortcut shortcut="Command A" feature="Select All" />
           <Shortcut shortcut="Enter" feature="Apply" />
