@@ -39,7 +39,7 @@ const Home = () => {
 
       {visible && (
         <Modal title="Modal" onClose={setVisible.bind(null, false)} onLog={setLogs}>
-          <Shortcut shortcut="Cmmand L" feature="Enable / Disable Shortcuts" />
+          <Shortcut shortcut="Command L" feature="Enable / Disable Shortcuts" />
           <Shortcut shortcut="Command A" feature="Select All" />
           <Shortcut shortcut="Enter" feature="Apply" />
           <Shortcut shortcut="ESC" feature="Close the Modal" />

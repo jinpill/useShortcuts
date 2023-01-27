@@ -29,10 +29,10 @@ const Modal = (props: ModalProps) => {
   });
 
   useShortcuts("Ctrl L", "Command L", () => {
-    const disabled = ENTER.getDisabled() && CTRL_A.getDisabled();
+    const disabled = ENTER.disabled && CTRL_A.disabled;
 
-    ENTER.setDisabled(!disabled);
-    CTRL_A.setDisabled(!disabled);
+    ENTER.disabled = !disabled;
+    CTRL_A.disabled = !disabled;
 
     log(disabled ? "Enable Shortcuts" : "Disable Shortcuts");
   });

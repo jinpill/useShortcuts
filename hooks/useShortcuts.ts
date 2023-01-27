@@ -4,8 +4,8 @@ import { isMacOs } from 'react-device-detect';
 type Callback = () => void
 
 type ShortcutObject = {
-  getDisabled: () => boolean;
-  setDisabled: (value: boolean) => void;
+  get disabled(): boolean;
+  set disabled(value: boolean);
 }
 
 interface UseShortcuts {
@@ -59,6 +59,7 @@ const useShortcuts: UseShortcuts = (_options: string, _optionsForMac: string | C
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
     if (shortcuts.key === "") return;
     if (callback === null) return;
+
     if (event.key.toLowerCase() !== shortcuts.key) return;
     if (event.ctrlKey !== shortcuts.ctrlKey) return;
     if (event.altKey !== shortcuts.altKey) return;
@@ -83,10 +84,10 @@ const useShortcuts: UseShortcuts = (_options: string, _optionsForMac: string | C
   }, [handleKeyDown]);
 
   return {
-    getDisabled() {
+    get disabled() {
       return disabled.current;
     },
-    setDisabled(value: boolean) {
+    set disabled(value: boolean) {
       disabled.current = value;
     }
   };
