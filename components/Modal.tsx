@@ -1,40 +1,52 @@
 import { Dispatch, SetStateAction, useEffect } from "react";
 import useShortcuts from "../hooks/useShortcuts";
+import Shortcut from "../components/Shortcut";
 import style from "./Modal.module.css";
 
 interface ModalProps {
   title: string;
   onClose: () => void;
   onLog: Dispatch<SetStateAction<string[]>>;
-  children: React.ReactNode;
 }
 
 const Modal = (props: ModalProps) => {
-  const log = (feature: string) => {
+  const addLog = (feature: string) => {
     console.log("Feature:", feature);
     props.onLog((prev) => [...prev, feature]);
   };
 
-  const ENTER = useShortcuts("Enter", () => {
-    log("Apply");
+  const ENTER = useShortcuts({
+    keys: "Enter",
+    disabled: true,
+    callback: () => {
+      addLog("Apply");
+    },
   });
 
-  const CTRL_A = useShortcuts("Ctrl A", "Command A", () => {
-    log("Select All");
+  const CTRL_A = useShortcuts({
+    keys: ["Ctrl A", "Command A"],
+    disabled: true,
+    callback: () => {
+      addLog("Select All");
+    },
   });
 
-  useShortcuts("Escape", () => {
-    props.onClose();
-    log("Close Modal");
+  const ESCAPE = useShortcuts({
+    keys: "Escape",
+    callback: () => {
+      props.onClose();
+      addLog("Close Modal");
+    },
   });
 
-  useShortcuts("Ctrl L", "Command L", () => {
-    const disabled = ENTER.disabled && CTRL_A.disabled;
-
-    ENTER.disabled = !disabled;
-    CTRL_A.disabled = !disabled;
-
-    log(disabled ? "Enable Shortcuts" : "Disable Shortcuts");
+  const CTRL_L = useShortcuts({
+    keys: ["Ctrl L", "Command L"],
+    callback: () => {
+      const disabled = ENTER.disabled && CTRL_A.disabled;
+      ENTER.disabled = !disabled;
+      CTRL_A.disabled = !disabled;
+      addLog(disabled ? "Enable Shortcuts" : "Disable Shortcuts");
+    },
   });
 
   const handleStopPropagation = (ev: React.MouseEvent) => {
@@ -50,7 +62,16 @@ const Modal = (props: ModalProps) => {
     <div className={style.cover} onClick={props.onClose}>
       <div className={style.container} onClick={handleStopPropagation}>
         <h2 className={style.title}>{props.title}</h2>
-        <div>{props.children}</div>
+        <div>
+          <Shortcut shortcut="ESC" feature="Close the Modal" disabled={ESCAPE.disabled} />
+          <Shortcut
+            shortcut="Command L"
+            feature="Enable / Disable Shortcuts"
+            disabled={CTRL_L.disabled}
+          />
+          <Shortcut shortcut="Command A" feature="Select All" disabled={CTRL_A.disabled} />
+          <Shortcut shortcut="Enter" feature="Apply" disabled={ENTER.disabled} />
+        </div>
       </div>
     </div>
   );

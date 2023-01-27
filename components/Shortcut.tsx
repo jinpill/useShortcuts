@@ -1,10 +1,12 @@
 import { Fragment } from "react";
 import { isMacOs } from "react-device-detect";
+import classNames from "classnames";
 import style from "./Shortcut.module.css";
 
 interface IShortcutProps {
   shortcut: string;
   feature: string;
+  disabled?: boolean;
 }
 
 const Shortcut = (props: IShortcutProps) => {
@@ -13,13 +15,17 @@ const Shortcut = (props: IShortcutProps) => {
     .map((key) => (isMacOs ? key : key.replace("Command", "Ctrl")));
 
   return (
-    <p className={style.shortcut}>
+    <p
+      className={classNames(style.shortcut, {
+        [style.disabled]: props.disabled,
+      })}
+    >
       {shortcuts.map((key, i) => (
         <Fragment key={`${key}-${i}`}>
           <kbd>{key}</kbd>{" "}
         </Fragment>
       ))}
-      {props.feature}
+      <span className={style.feature}>{props.feature}</span>
     </p>
   );
 };

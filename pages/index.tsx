@@ -1,5 +1,4 @@
 import { useEffect, useState, useRef } from "react";
-import Shortcut from "../components/Shortcut";
 import Modal from "../components/Modal";
 import style from "./index.module.css";
 
@@ -37,14 +36,7 @@ const Home = () => {
         ))}
       </div>
 
-      {visible && (
-        <Modal title="Modal" onClose={setVisible.bind(null, false)} onLog={setLogs}>
-          <Shortcut shortcut="Command L" feature="Enable / Disable Shortcuts" />
-          <Shortcut shortcut="Command A" feature="Select All" />
-          <Shortcut shortcut="Enter" feature="Apply" />
-          <Shortcut shortcut="ESC" feature="Close the Modal" />
-        </Modal>
-      )}
+      {visible && <Modal title="Modal" onClose={setVisible.bind(null, false)} onLog={setLogs} />}
     </>
   );
 };

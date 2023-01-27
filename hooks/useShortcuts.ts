@@ -1,19 +1,14 @@
 import { useRef, useCallback, useEffect } from 'react';
 import { isMacOs } from 'react-device-detect';
 
-type Callback = () => void
+export type Callback = () => void
 
-type ShortcutObject = {
+export type ShortcutObject = {
   get disabled(): boolean;
   set disabled(value: boolean);
 }
 
-interface UseShortcuts {
-  (_options: string, _callback: Callback): ShortcutObject
-  (_options: string, _optionsForMac: string, _callback: Callback): ShortcutObject
-}
-
-interface Shortcuts {
+export interface Shortcuts {
   key: string,
   ctrlKey?: boolean,
   altKey?: boolean,
@@ -21,44 +16,72 @@ interface Shortcuts {
   metaKey?: boolean,
 }
 
+export type ShortcutKeys = string | [string, string]
+
+export interface ShortcutOptions {
+  keys: ShortcutKeys
+  disabled?: boolean
+  preventInFocus?: boolean
+  callback: Callback
+}
+
+export type UseShortcuts = (options: ShortcutOptions) => ShortcutObject
+
+// Get an object for shortcuts.
 const getShortcuts = (_keys: string): Shortcuts => {
+  const keys = _keys.toLowerCase();
+  const options = keys.split(" ").map(key => key.trim());
+
   const result: Shortcuts = {
-    key: "",
+    key: keys,
     ctrlKey: false,
     altKey: false,
     shiftKey: false,
     metaKey: false
   };
 
-  const keys = _keys.toLowerCase();
-  const options = keys.split(" ").map(key => key.trim());
+  if (options.includes("ctrl")) {
+    result.ctrlKey = true;
+    result.key = result.key.replace("ctrl", "");
+  }
 
-  if (options.includes("ctrl")) result.ctrlKey = true;
-  if (options.includes("alt")) result.altKey = true;
-  if (options.includes("shift")) result.shiftKey = true;
-  if (options.includes("command")) result.metaKey = true;
-  result.key = keys.replace("ctrl", "").replace("alt", "").replace("shift", "").replace("command", "").trim();
+  if (options.includes("alt")) {
+    result.altKey = true;
+    result.key = result.key.replace("alt", "");
+  }
 
+  if (options.includes("shift")) {
+    result.shiftKey = true;
+    result.key = result.key.replace("shift", "");
+  }
+
+  if (options.includes("command")) {
+    result.metaKey = true;
+    result.key = result.key.replace("command", "");
+  }
+
+  result.key = result.key.trim();
   return result;
 }
 
-const useShortcuts: UseShortcuts = (_options: string, _optionsForMac: string | Callback, _callback?: Callback) => {
-  let keys: string = "";
-  let callback: Callback | null = null;
-  const disabled = useRef(false);
-
-  if (typeof _optionsForMac !== 'string') {
-    keys = _options;
-    callback = _optionsForMac;
-  } else if (typeof _callback !== 'undefined') {
-    keys = isMacOs ? _optionsForMac : _options;
-    callback = _callback!;
+// Get the shortcut keys.
+const getKeys = (keys: ShortcutKeys): string => {
+  if (keys instanceof Array) {
+    const index = Number(isMacOs)
+    return keys[index]
   }
+
+  return keys;
+}
+
+// Hook for keyboard shortcuts.
+const useShortcuts: UseShortcuts = (options) => {
+  const keys = getKeys(options.keys);
+  const disabled = useRef(options.disabled ?? false);
 
   const shortcuts = getShortcuts(keys);
   const handleKeyDown = useCallback((event: KeyboardEvent) => {
     if (shortcuts.key === "") return;
-    if (callback === null) return;
 
     if (event.key.toLowerCase() !== shortcuts.key) return;
     if (event.ctrlKey !== shortcuts.ctrlKey) return;
@@ -68,14 +91,14 @@ const useShortcuts: UseShortcuts = (_options: string, _optionsForMac: string | C
 
     event.preventDefault();
     if (disabled.current) return;
-    callback();
+    options.callback();
   }, [
     shortcuts.key,
     shortcuts.ctrlKey,
     shortcuts.altKey,
     shortcuts.shiftKey,
     shortcuts.metaKey,
-    callback
+    options
   ]);
 
   useEffect(() => {
