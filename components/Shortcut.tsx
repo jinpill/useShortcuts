@@ -7,6 +7,12 @@ interface IShortcutProps {
   shortcut: string;
   feature: string;
   disabled?: boolean;
+  disallowed?: {
+    input?: boolean;
+    textarea?: boolean;
+    select?: boolean;
+    button?: boolean;
+  };
 }
 
 const Shortcut = (props: IShortcutProps) => {
@@ -26,6 +32,10 @@ const Shortcut = (props: IShortcutProps) => {
         </Fragment>
       ))}
       <span className={style.feature}>{props.feature}</span>
+      {props.disallowed?.input && <span className={style.disallowed}>input</span>}
+      {props.disallowed?.textarea && <span className={style.disallowed}>textarea</span>}
+      {props.disallowed?.select && <span className={style.disallowed}>select</span>}
+      {props.disallowed?.button && <span className={style.disallowed}>button</span>}
     </p>
   );
 };

@@ -18,10 +18,17 @@ export interface Shortcuts {
 
 export type ShortcutKeys = string | [string, string]
 
+export type FocusOptions = boolean | {
+  input?: boolean
+  textarea?: boolean
+  select?: boolean
+  button?: boolean
+}
+
 export interface ShortcutOptions {
   keys: ShortcutKeys
   disabled?: boolean
-  preventInFocus?: boolean
+  disallowFocusing?: FocusOptions
   callback: Callback
 }
 
@@ -74,6 +81,28 @@ const getKeys = (keys: ShortcutKeys): string => {
   return keys;
 }
 
+const checkFocusing = (options: FocusOptions = false): boolean => {
+  if (options === false) return false;
+
+  const activeElement = document.activeElement;
+  if (!activeElement) return false;
+
+  const tagName = activeElement?.tagName;
+  if (!tagName) return false;
+
+  if (options === true) {
+    if (tagName === "BODY") return false;
+    return true;
+  }
+
+  if (options.input && tagName === "INPUT") return true;
+  if (options.textarea && tagName === "TEXTAREA") return true;
+  if (options.select && tagName === "SELECT") return true;
+  if (options.button && tagName === "BUTTON") return true;
+
+  return false;
+}
+
 // Hook for keyboard shortcuts.
 const useShortcuts: UseShortcuts = (options) => {
   const keys = getKeys(options.keys);
@@ -89,8 +118,10 @@ const useShortcuts: UseShortcuts = (options) => {
     if (event.shiftKey !== shortcuts.shiftKey) return;
     if (event.metaKey !== shortcuts.metaKey) return;
 
-    event.preventDefault();
+    if (checkFocusing(options.disallowFocusing)) return;
     if (disabled.current) return;
+
+    event.preventDefault();
     options.callback();
   }, [
     shortcuts.key,
