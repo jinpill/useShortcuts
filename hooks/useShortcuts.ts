@@ -4,10 +4,14 @@ import { isMacOs } from 'react-device-detect'
 export type Callback = () => void
 
 export interface ShortcutObject {
+  get keys(): string
+  getKeys: (arr?: boolean) => string | string[]
+
   get allowed(): boolean
   set allowed(value: boolean)
   getAllowed: () => boolean
   setAllowed: (value: boolean) => void
+
   getBackup: (value?: boolean) => Backup
 }
 
@@ -82,7 +86,7 @@ const getShortcuts = (_keys: string): Shortcuts => {
 }
 
 // Get the shortcut keys.
-const getKeys = (keys: ShortcutKeys): string => {
+const getKeysFromOS = (keys: ShortcutKeys): string => {
   if (!Array.isArray(keys)) return keys
   const index = Number(isMacOs)
   return keys[index]
@@ -112,7 +116,7 @@ const checkFocusing = (options: boolean | FocusOptions = false): boolean => {
 
 // Hook for keyboard shortcuts.
 const useShortcuts: UseShortcuts = (options) => {
-  const keys = getKeys(options.keys)
+  const keys = getKeysFromOS(options.keys)
   const allowed = useRef(options.allowed ?? true)
 
   const shortcuts = getShortcuts(keys)
@@ -147,6 +151,19 @@ const useShortcuts: UseShortcuts = (options) => {
     return () => document.removeEventListener('keydown', handleKeyDown)
   }, [handleKeyDown])
 
+  const getKeys = useCallback((arr = false) => {
+    const _keys = !isMacOs
+      ? keys
+      : keys
+        .replace('Command', '⌘')
+        .replace('Control', '⌃')
+        .replace('Option', '⌥')
+        .replace('Shift', '⇧')
+
+    if (!arr) return _keys
+    return _keys.split(' ')
+  }, [keys])
+
   const getAllowed = useCallback(() => {
     return allowed.current
   }, [])
@@ -175,6 +192,11 @@ const useShortcuts: UseShortcuts = (options) => {
   }, [])
 
   return {
+    get keys() {
+      return getKeys() as string
+    },
+    getKeys,
+
     get allowed() {
       return getAllowed()
     },
@@ -183,6 +205,7 @@ const useShortcuts: UseShortcuts = (options) => {
     },
     getAllowed,
     setAllowed,
+
     getBackup
   }
 }
