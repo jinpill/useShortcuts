@@ -124,7 +124,9 @@ const useShortcuts: UseShortcuts = (options) => {
     (event: KeyboardEvent) => {
       if (shortcuts.key === '') return
 
-      if (event.key.toLowerCase() !== shortcuts.key) return
+      const key = event.code.replace('Key', '').toLowerCase()
+      if (key !== shortcuts.key) return
+
       if (event.ctrlKey !== shortcuts.ctrlKey) return
       if (event.altKey !== shortcuts.altKey) return
       if (event.shiftKey !== shortcuts.shiftKey) return
