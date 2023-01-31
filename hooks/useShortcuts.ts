@@ -156,8 +156,8 @@ const useShortcuts: UseShortcuts = (options) => {
       ? keys
       : keys
         .replace('Command', '⌘')
-        .replace('Control', '⌃')
-        .replace('Option', '⌥')
+        .replace('Ctrl', '⌃')
+        .replace('Alt', '⌥')
         .replace('Shift', '⇧')
 
     if (!arr) return _keys
