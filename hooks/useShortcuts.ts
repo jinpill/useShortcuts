@@ -1,43 +1,45 @@
-import { useRef, useCallback, useEffect } from 'react';
-import { isMacOs } from 'react-device-detect';
+import { useRef, useCallback, useEffect } from "react";
+import { isMacOs } from "react-device-detect";
 
-export type Callback = () => void
+export type Callback = () => void;
 
-export type ShortcutObject = {
+export interface ShortcutObject {
   get disabled(): boolean;
   set disabled(value: boolean);
+  getDisabled: () => boolean;
+  setDisabled: (value: boolean) => void;
 }
 
 export interface Shortcuts {
-  key: string,
-  ctrlKey?: boolean,
-  altKey?: boolean,
-  shiftKey?: boolean,
-  metaKey?: boolean,
+  key: string;
+  ctrlKey?: boolean;
+  altKey?: boolean;
+  shiftKey?: boolean;
+  metaKey?: boolean;
 }
 
-export type ShortcutKeys = string | [string, string]
+export type ShortcutKeys = string | [string, string];
 
-export type FocusOptions = boolean | {
-  input?: boolean
-  textarea?: boolean
-  select?: boolean
-  button?: boolean
+export interface FocusOptions {
+  input?: boolean;
+  textarea?: boolean;
+  select?: boolean;
+  button?: boolean;
 }
 
 export interface ShortcutOptions {
-  keys: ShortcutKeys
-  disabled?: boolean
-  disallowFocusing?: FocusOptions
-  callback: Callback
+  keys: ShortcutKeys;
+  disabled?: boolean;
+  disallowFocusing?: boolean | FocusOptions;
+  callback: Callback;
 }
 
-export type UseShortcuts = (options: ShortcutOptions) => ShortcutObject
+export type UseShortcuts = (options: ShortcutOptions) => ShortcutObject;
 
 // Get an object for shortcuts.
 const getShortcuts = (_keys: string): Shortcuts => {
   const keys = _keys.toLowerCase();
-  const options = keys.split(" ").map(key => key.trim());
+  const options = keys.split(" ").map((key) => key.trim());
 
   const result: Shortcuts = {
     key: keys,
@@ -69,19 +71,16 @@ const getShortcuts = (_keys: string): Shortcuts => {
 
   result.key = result.key.trim();
   return result;
-}
+};
 
 // Get the shortcut keys.
 const getKeys = (keys: ShortcutKeys): string => {
-  if (keys instanceof Array) {
-    const index = Number(isMacOs)
-    return keys[index]
-  }
+  if (!Array.isArray(keys)) return keys;
+  const index = Number(isMacOs);
+  return keys[index];
+};
 
-  return keys;
-}
-
-const checkFocusing = (options: FocusOptions = false): boolean => {
+const checkFocusing = (options: boolean | FocusOptions = false): boolean => {
   if (options === false) return false;
 
   const activeElement = document.activeElement;
@@ -101,7 +100,7 @@ const checkFocusing = (options: FocusOptions = false): boolean => {
   if (options.button && tagName === "BUTTON") return true;
 
   return false;
-}
+};
 
 // Hook for keyboard shortcuts.
 const useShortcuts: UseShortcuts = (options) => {
@@ -133,17 +132,27 @@ const useShortcuts: UseShortcuts = (options) => {
   ]);
 
   useEffect(() => {
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [handleKeyDown]);
+
+  const getDisabled = useCallback(() => {
+    return disabled.current;
+  }, []);
+
+  const setDisabled = useCallback((value: boolean) => {
+    disabled.current = value;
+  }, []);
 
   return {
     get disabled() {
-      return disabled.current;
+      return getDisabled()
     },
     set disabled(value: boolean) {
-      disabled.current = value;
-    }
+      setDisabled(value)
+    },
+    getDisabled,
+    setDisabled
   };
 };
 
